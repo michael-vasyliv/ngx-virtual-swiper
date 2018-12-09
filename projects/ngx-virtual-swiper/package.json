@@ -1,0 +1,27 @@
+{
+  "name": "ngx-virtual-swiper",
+  "version": "0.0.1",
+  "license": "MIT",
+  "keywords": [
+    "angular-virtual-swiper",
+    "angular-material-swiper",
+    "angular-swiper",
+    "virtual-swiper",
+    "material-swiper",
+    "ngx-virtual-swiper"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vasyliv/ngx-virtual-swiper"
+  },
+  "bugs": {
+    "url": "https://github.com/vasyliv/ngx-virtual-swiper/issues"
+  },
+  "homepage": "https://github.com/vasyliv/ngx-virtual-swiper",
+  "peerDependencies": {
+    "@angular/cdk": "~7.1.1",
+    "@angular/common": "~7.1.0",
+    "@angular/core": "~7.1.0",
+    "rxjs": "~6.3.3"
+  }
+}

@@ -1,0 +1,15 @@
+.cdk-virtual-scroll-data-source-example .example-viewport {
+    height: 300px;
+    width: 500px;
+    border: 1px solid black;
+}
+
+    .cdk-virtual-scroll-data-source-example .example-viewport .cdk-virtual-scroll-content-wrapper {
+        display: flex;
+        flex-direction: row;
+    }
+
+.cdk-virtual-scroll-data-source-example .example-item {
+    width: 50px;
+    height: 100%;
+}
