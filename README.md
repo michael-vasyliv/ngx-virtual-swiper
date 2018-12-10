@@ -47,3 +47,7 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 `ngx-virtual-swiper` depeneds on the following libraries to work.
 
 * [@angular/material](https://material.angular.io/cdk/scrolling/api)
+
+## Demo
+
+See [Demo](https://github.com/vasyliv/ngx-virtual-swiper/tree/master/src/app/demos)
