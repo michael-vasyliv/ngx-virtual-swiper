@@ -35,7 +35,7 @@ describe('NgxVirtualSwiperDirective', () => {
                 expect(directive.options).toEqual(NgxVirtualSwiperOptions);
             });
             it('ngOnInit, should be the error', () => {
-                expect(() => directive.ngOnInit()).toThrow(Error('CdkVirtualScrollViewport is not present.'));
+                expect(() => directive.ngOnInit()).toThrow(new Error('CdkVirtualScrollViewport is not present.'));
             });
             it('ngOnDestroy, should call unsubscribe', () => {
                 spyOn(directive.subscription, 'unsubscribe');
