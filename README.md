@@ -12,6 +12,10 @@
   </a>
 </p>
 
+## [Demo](https://stackblitz.com/edit/angular-kw59pk)
+
+## [Examples](https://github.com/vasyliv/ngx-virtual-swiper/tree/master/src/app/demos)
+
 ## Getting Started
 
 ### Installation
