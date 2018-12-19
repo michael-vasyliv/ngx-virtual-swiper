@@ -1,14 +1,17 @@
 {
   "name": "ngx-virtual-swiper",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "MIT",
   "keywords": [
-    "angular-virtual-swiper",
-    "angular-material-swiper",
+    "swipe",
+    "swiper",
+    "angular",
     "angular-swiper",
     "virtual-swiper",
     "material-swiper",
-    "ngx-virtual-swiper"
+    "ngx-virtual-swiper",
+    "angular-virtual-swiper",
+    "angular-material-swiper"
   ],
   "repository": {
     "type": "git",

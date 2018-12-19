@@ -1,5 +1,7 @@
 # NgxVirtualSwiper
 
+Swiper with virtual scroll.
+
 <p align="center">
   <a href="https://www.npmjs.com/package/ngx-virtual-swiper">
     <img alt="npm version" src="https://img.shields.io/npm/v/ngx-virtual-swiper.svg">
@@ -11,6 +13,10 @@
     <img alt="licence" src="https://img.shields.io/npm/l/ngx-virtual-swiper.svg">
   </a>
 </p>
+
+## [Demo](https://stackblitz.com/edit/angular-kw59pk)
+
+## [Examples](https://github.com/vasyliv/ngx-virtual-swiper/tree/master/src/app/demos)
 
 ## Getting Started
 

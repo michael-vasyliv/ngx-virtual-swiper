@@ -1,5 +1,7 @@
 # NgxVirtualSwiper
 
+Swiper with virtual scroll.
+
 <p align="center">
   <a href="https://www.npmjs.com/package/ngx-virtual-swiper">
     <img alt="npm version" src="https://img.shields.io/npm/v/ngx-virtual-swiper.svg">
@@ -51,7 +53,3 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 `ngx-virtual-swiper` depeneds on the following libraries to work.
 
 * [@angular/material](https://material.angular.io/cdk/scrolling/api)
-
-## Demo
-
-See [Demo](https://github.com/vasyliv/ngx-virtual-swiper/tree/master/src/app/demos)
