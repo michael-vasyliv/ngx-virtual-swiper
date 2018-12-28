@@ -15,18 +15,25 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
      * */
     @ContentChild(CdkVirtualScrollViewport) readonly cdk: CdkVirtualScrollViewport;
     @Input('ngxVirtualSwiper') options: Partial<INgxVirtualSwiperOptions>;
+    @Input() itemSize: number;
     readonly subscription = new Subscription();
+    _index: number;
+    _halfItemSize: number;
     _isSwiped: boolean;
     _clientX: number;
     _clientY: number;
     _prevClientX: number;
     _prevClientY: number;
-    _index: number;
+    /** Absolute scrolling by Y axis */
+    _scrollTop: number;
+    /** Absolute scrolling by X axis */
+    _scrollLeft: number;
 
     constructor() { }
 
     ngOnChanges(): void {
         this.options = { ...NgxVirtualSwiperOptions, ...this.options };
+        this._halfItemSize = this.itemSize / 2;
     }
 
     ngOnInit(): void {
@@ -106,9 +113,27 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
         }
     }
 
+    @HostListener('scroll', ['$event']) scroll = (e): void => {
+        if (this._isSwiped && !this.options.disabled) {
+            this._scrollLeft = e.target.scrollLeft;
+            this._scrollTop = e.target.scrollTop;
+        }
+    }
+
     toggleSwiped = (value: boolean): void => {
         this._isSwiped = value;
     }
 
-    finalize = (): void => this.options.finalize && this.cdk.scrollToIndex(this._index, 'smooth');
+    finalize = (): void => {
+        if (this.options.finalize) {
+            const scrolledAbs = this.cdk.orientation === 'horizontal' ? this._scrollLeft :
+                this.cdk.orientation === 'vertical' ? this._scrollTop :
+                    null;
+            if (isNumber(scrolledAbs) && isNumber(this._halfItemSize)) {
+                const scrolled = scrolledAbs - this.itemSize * this._index;
+                const index = scrolled > this._halfItemSize ? this._index + 1 : this._index;
+                this.cdk.scrollToIndex(index, 'smooth');
+            }
+        }
+    }
 }
