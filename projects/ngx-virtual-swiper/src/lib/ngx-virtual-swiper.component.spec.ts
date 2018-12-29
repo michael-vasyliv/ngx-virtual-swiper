@@ -38,7 +38,7 @@ describe('NgxVirtualSwiperDirective', () => {
             });
             it('ngOnDestroy, should call unsubscribe', () => {
                 spyOn(directive.subscription, 'unsubscribe');
-                spyOn(window, "clearTimeout");
+                spyOn(window, 'clearTimeout');
                 directive.ngOnDestroy();
                 expect(directive.subscription.unsubscribe).toHaveBeenCalled();
                 expect(window.clearTimeout).toHaveBeenCalledWith(directive._scrollTimer);
@@ -143,12 +143,12 @@ describe('NgxVirtualSwiperDirective', () => {
                 expect(directive._isSwiped).toEqual(value);
             });
             it('finalize', () => {
-                spyOn(window, "clearTimeout");
-                spyOn(window, "setTimeout");
+                spyOn(window, 'clearTimeout');
+                spyOn(window, 'setTimeout');
                 directive.finalize();
                 expect(window.clearTimeout).toHaveBeenCalledWith(directive._scrollTimer);
                 expect(window.setTimeout).toHaveBeenCalledWith(directive.scrollToNearestIndex, directive.options.finalizeTime);
-            })
+            });
             describe('scrollToNearestIndex, should call scrollToIndex', () => {
                 beforeEach(() => {
                     spyOn(directive.cdk, 'scrollToIndex');

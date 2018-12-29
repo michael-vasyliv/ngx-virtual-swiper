@@ -26,11 +26,7 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
     _scrollTop: number;
     /** Absolute scrolling by X axis */
     _scrollLeft: number;
-    /**
-     * contains id of the last {@link setTimeout}
-     * @interface number
-     * @interface NodeJS.Timer
-     * */
+    /** contains id of the last {@link setTimeout} */
     _scrollTimer;
 
     constructor() { }
