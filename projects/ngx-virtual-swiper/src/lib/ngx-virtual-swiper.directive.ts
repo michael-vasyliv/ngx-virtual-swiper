@@ -10,9 +10,7 @@ import { INgxVirtualSwiperOptions } from './interfaces';
 })
 export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
 
-    /**
-     * to lean more see https://material.angular.io/cdk/scrolling/api
-     * */
+    /** to lean more see https://material.angular.io/cdk/scrolling/api */
     @ContentChild(CdkVirtualScrollViewport) readonly cdk: CdkVirtualScrollViewport;
     @Input('ngxVirtualSwiper') options: Partial<INgxVirtualSwiperOptions>;
     @Input() itemSize: number;
@@ -28,6 +26,12 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
     _scrollTop: number;
     /** Absolute scrolling by X axis */
     _scrollLeft: number;
+    /**
+     * contains id of the last {@link setTimeout}
+     * @interface number
+     * @interface NodeJS.Timer
+     * */
+    _scrollTimer;
 
     constructor() { }
 
@@ -45,6 +49,7 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.subscription.unsubscribe();
+        clearTimeout(this._scrollTimer);
     }
 
     get changed(): boolean {
@@ -79,7 +84,7 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
     }
 
     @HostListener('mousemove', ['$event']) mousemove = (e): void => {
-        if (this._isSwiped && !this.options.disabled) {
+        if (this._isSwiped) {
             if (this.cdk.orientation === 'horizontal') {
                 this._mousemoveX(e);
             }
@@ -90,14 +95,12 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
     }
 
     @HostListener('mousedown', ['$event']) mousedown = (e): void => {
-        if (!this.options.disabled) {
-            this.toggleSwiped(true);
-            this._clientX = e.clientX;
-            this._clientY = e.clientY;
-            this._prevClientX = e.clientX;
-            this._prevClientY = e.clientY;
-            e.preventDefault();
-        }
+        this.toggleSwiped(true);
+        this._clientX = e.clientX;
+        this._clientY = e.clientY;
+        this._prevClientX = e.clientX;
+        this._prevClientY = e.clientY;
+        e.preventDefault();
     }
 
     @HostListener('click', ['$event']) click = (e): void => {
@@ -107,17 +110,15 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
     }
 
     @HostListener('document:mouseup') mouseup = (): void => {
-        if (this._isSwiped && !this.options.disabled) {
+        if (this._isSwiped) {
             this.toggleSwiped(false);
-            this.finalize();
         }
     }
 
     @HostListener('scroll', ['$event']) scroll = (e): void => {
-        if (this._isSwiped && !this.options.disabled) {
-            this._scrollLeft = e.target.scrollLeft;
-            this._scrollTop = e.target.scrollTop;
-        }
+        this._scrollLeft = e.target.scrollLeft;
+        this._scrollTop = e.target.scrollTop;
+        this.finalize();
     }
 
     toggleSwiped = (value: boolean): void => {
@@ -126,14 +127,19 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
 
     finalize = (): void => {
         if (this.options.finalize) {
-            const scrolledAbs = this.cdk.orientation === 'horizontal' ? this._scrollLeft :
-                this.cdk.orientation === 'vertical' ? this._scrollTop :
-                    null;
-            if (isNumber(scrolledAbs) && isNumber(this._halfItemSize)) {
-                const scrolled = scrolledAbs - this.itemSize * this._index;
-                const index = scrolled > this._halfItemSize ? this._index + 1 : this._index;
-                this.cdk.scrollToIndex(index, 'smooth');
-            }
+            clearTimeout(this._scrollTimer);
+            this._scrollTimer = setTimeout(this.scrollToNearestIndex, this.options.finalizeTime);
+        }
+    }
+
+    scrollToNearestIndex = (): void => {
+        const scrolledAbs = this.cdk.orientation === 'horizontal' ? this._scrollLeft :
+            this.cdk.orientation === 'vertical' ? this._scrollTop :
+                null;
+        if (isNumber(scrolledAbs) && isNumber(this._halfItemSize)) {
+            const scrolled = scrolledAbs - this.itemSize * this._index;
+            const index = scrolled > this._halfItemSize ? this._index + 1 : this._index;
+            this.cdk.scrollToIndex(index, 'smooth');
         }
     }
 }
