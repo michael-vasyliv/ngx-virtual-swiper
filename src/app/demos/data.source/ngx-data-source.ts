@@ -58,4 +58,8 @@ export class MyDataSource extends DataSource<string | undefined> {
 export class NgxDataSourceComponent {
 
     items = new MyDataSource();
+
+    click = () => {
+        console.log('hellow bob');
+    }
 }

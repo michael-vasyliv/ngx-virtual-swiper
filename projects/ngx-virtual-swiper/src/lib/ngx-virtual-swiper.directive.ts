@@ -3,7 +3,8 @@ import { ContentChild, Directive, HostListener, Input, OnChanges, OnDestroy, OnI
 import { Subscription } from 'rxjs';
 import { isNumber } from 'util';
 import { NgxVirtualSwiperOptions } from './constants';
-import { INgxVirtualSwiperOptions } from './interfaces';
+import { INgxVirtualSwiperOptions, IPositionEvent } from './interfaces';
+import { getPositions } from './utils';
 
 @Directive({
     selector: '[ngxVirtualSwiper]'
@@ -26,8 +27,6 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
     _scrollTop: number;
     /** Absolute scrolling by X axis */
     _scrollLeft: number;
-    /** contains id of the last {@link setTimeout} */
-    _scrollTimer;
 
     constructor() { }
 
@@ -40,12 +39,30 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
         if (!this.cdk) {
             throw new Error('CdkVirtualScrollViewport is not present.');
         }
+        this.addEventListener();
         this.subscription.add(this.cdk.scrolledIndexChange.subscribe(i => this._index = i));
     }
 
     ngOnDestroy(): void {
         this.subscription.unsubscribe();
-        clearTimeout(this._scrollTimer);
+        this.removeEventListener();
+    }
+
+    @HostListener('mousedown', ['$event']) mousedown = (e): void => this.start(getPositions(e));
+
+    @HostListener('touchstart', ['$event']) touchstart = (e): void => this.start(getPositions(e));
+
+    @HostListener('mousemove', ['$event']) mousemove = (e): void => this.move(getPositions(e));
+
+    @HostListener('touchmove', ['$event']) touchmove = (e): void => this.move(getPositions(e));
+
+    @HostListener('document:mouseup') mouseup = (): void => this.finish();
+
+    @HostListener('touchend') touchend = (): void => this.finish();
+
+    @HostListener('scroll', ['$event']) scroll = (e): void => {
+        this._scrollLeft = e.target.scrollLeft;
+        this._scrollTop = e.target.scrollTop;
     }
 
     get changed(): boolean {
@@ -61,25 +78,36 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
         return result;
     }
 
-    _mousemoveX = (e): void => {
+    _mousemoveX = (e: IPositionEvent): void => {
         if (e) {
-            const offset = this.cdk.measureScrollOffset(this.options.offsetXFrom);
+            const offset = this.cdk.measureScrollOffset();
             const value = offset - e.clientX + this._clientX;
             this.cdk.scrollToOffset(value);
             this._clientX = e.clientX;
         }
     }
 
-    _mousemoveY = (e): void => {
+    _mousemoveY = (e: IPositionEvent): void => {
         if (e) {
-            const offset = this.cdk.measureScrollOffset(this.options.offsetYFrom);
+            const offset = this.cdk.measureScrollOffset();
             const value = offset - e.clientY + this._clientY;
             this.cdk.scrollToOffset(value);
             this._clientY = e.clientY;
         }
     }
 
-    @HostListener('mousemove', ['$event']) mousemove = (e): void => {
+    start = (e: IPositionEvent): void => {
+        this.toggleSwiped(true);
+        this._clientX = e.clientX;
+        this._clientY = e.clientY;
+        this._prevClientX = e.clientX;
+        this._prevClientY = e.clientY;
+        if (this.options.preventClicks) {
+            e.originalEvent.preventDefault();
+        }
+    }
+
+    move = (e: IPositionEvent): void => {
         if (this._isSwiped) {
             if (this.cdk.orientation === 'horizontal') {
                 this._mousemoveX(e);
@@ -90,31 +118,11 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
         }
     }
 
-    @HostListener('mousedown', ['$event']) mousedown = (e): void => {
-        this.toggleSwiped(true);
-        this._clientX = e.clientX;
-        this._clientY = e.clientY;
-        this._prevClientX = e.clientX;
-        this._prevClientY = e.clientY;
-        e.preventDefault();
-    }
-
-    @HostListener('click', ['$event']) click = (e): void => {
-        if (this.changed && this.options.preventDefaultClick) {
-            e.preventDefault();
-        }
-    }
-
-    @HostListener('document:mouseup') mouseup = (): void => {
+    finish = (): void => {
         if (this._isSwiped) {
             this.toggleSwiped(false);
+            this.finalize();
         }
-    }
-
-    @HostListener('scroll', ['$event']) scroll = (e): void => {
-        this._scrollLeft = e.target.scrollLeft;
-        this._scrollTop = e.target.scrollTop;
-        this.finalize();
     }
 
     toggleSwiped = (value: boolean): void => {
@@ -123,8 +131,7 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
 
     finalize = (): void => {
         if (this.options.finalize) {
-            clearTimeout(this._scrollTimer);
-            this._scrollTimer = setTimeout(this.scrollToNearestIndex, this.options.finalizeTime);
+            this.scrollToNearestIndex();
         }
     }
 
@@ -136,6 +143,23 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
             const scrolled = scrolledAbs - this.itemSize * this._index;
             const index = scrolled > this._halfItemSize ? this._index + 1 : this._index;
             this.cdk.scrollToIndex(index, 'smooth');
+        }
+    }
+
+    addEventListener = (): void => {
+        this.cdk.elementRef.nativeElement.addEventListener('click', this.preventClicks, true);
+    }
+
+    removeEventListener = (): void => {
+        this.cdk.elementRef.nativeElement.removeEventListener('click', this.preventClicks, true);
+    }
+
+    /** prevent all type of clicks (e.g. click on links, Angular`s click) */
+    preventClicks = (e): void => {
+        if (this.changed && this.options.preventClicks) {
+            e.stopPropagation();
+            e.preventDefault();
+            e.stopImmediatePropagation();
         }
     }
 }

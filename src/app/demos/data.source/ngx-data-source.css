@@ -1,11 +1,13 @@
 .example-viewport {
     height: 500px;
-    width: 200px;
+    width: 300px;
     border: 1px solid black;
 }
 
 .example-item {
     height: 150px;
+    width: 150px;
+    display: block;
 }
 
 .red {

@@ -96,21 +96,21 @@ describe('NgxVirtualSwiperDirective', () => {
                     spyOn(directive, '_mousemoveX');
                     directive._isSwiped = true;
                     directive.cdk.orientation = 'horizontal';
-                    directive.mousemove(clickEvent);
+                    directive.move(clickEvent);
                     expect(directive._mousemoveX).toHaveBeenCalledWith(clickEvent);
                 });
                 it('shoould call _mousemoveY', () => {
                     spyOn(directive, '_mousemoveY');
                     directive._isSwiped = true;
                     directive.cdk.orientation = 'vertical';
-                    directive.mousemove(clickEvent);
+                    directive.move(clickEvent);
                     expect(directive._mousemoveY).toHaveBeenCalledWith(clickEvent);
                 });
             });
             it('mousedown, should save position of cursor and call preventDefault', () => {
                 spyOn(directive, 'toggleSwiped');
                 spyOn(clickEvent, 'preventDefault');
-                directive.mousedown(clickEvent);
+                directive.start(clickEvent);
                 expect(directive.toggleSwiped).toHaveBeenCalledWith(true);
                 expect(directive._clientX).toEqual(clickEvent.clientX);
                 expect(directive._clientY).toEqual(clickEvent.clientY);
@@ -118,16 +118,10 @@ describe('NgxVirtualSwiperDirective', () => {
                 expect(directive._prevClientY).toEqual(clickEvent.clientY);
                 expect(clickEvent.preventDefault).toHaveBeenCalled();
             });
-            it('click, should call preventDefault', () => {
-                spyOn(clickEvent, 'preventDefault');
-                Object.defineProperty(directive, 'changed', { get: () => true });
-                directive.click(clickEvent);
-                expect(clickEvent.preventDefault).toHaveBeenCalled();
-            });
             it('mouseup, should call toggleSwiped', () => {
                 spyOn(directive, 'toggleSwiped');
                 directive._isSwiped = true;
-                directive.mouseup();
+                directive.finish();
                 expect(directive.toggleSwiped).toHaveBeenCalledWith(false);
             });
             it('scroll, should set scroll variables and call finalize', () => {
