@@ -58,6 +58,9 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
 
     @HostListener('document:mouseup') mouseup = (): void => this.finish();
 
+    /** the bug-fix to prevent dragging images while swiping */
+    @HostListener('document:dragstart', ['$event']) dragstart = (e): void => e && e.preventDefault();
+
     @HostListener('touchend') touchend = (): void => this.finish();
 
     @HostListener('scroll', ['$event']) scroll = (e): void => {

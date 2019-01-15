@@ -1,5 +1,6 @@
 <cdk-virtual-scroll-viewport itemSize="150" class="example-viewport" ngxVirtualSwiper (click)="click(111)">
     <a href="https://google.com" *cdkVirtualFor="let item of items" class="example-item" [class.red]="!item" (click)="click(222)">
         {{ item || 'Loading...' }}
+        <img src="https://cdn3.iconfinder.com/data/icons/social-media-logos-glyph-1/2048/5343_-_Google_Chrome-128.png" alt="Alternate Text" />
     </a>
 </cdk-virtual-scroll-viewport>
