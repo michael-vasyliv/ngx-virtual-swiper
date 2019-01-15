@@ -102,9 +102,6 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
         this._clientY = e.clientY;
         this._prevClientX = e.clientX;
         this._prevClientY = e.clientY;
-        if (this.options.preventClicks) {
-            e.originalEvent.preventDefault();
-        }
     }
 
     move = (e: IPositionEvent): void => {
