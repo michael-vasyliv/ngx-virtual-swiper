@@ -44,8 +44,8 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.subscription.unsubscribe();
         this.removeEventListener();
+        this.subscription.unsubscribe();
     }
 
     @HostListener('mousedown', ['$event']) mousedown = (e): void => this.start(getPositions(e));
@@ -58,15 +58,15 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
 
     @HostListener('document:mouseup') mouseup = (): void => this.finish();
 
-    /** the bug-fix to prevent dragging images while swiping */
-    @HostListener('document:dragstart', ['$event']) dragstart = (e): void => e && e.preventDefault();
-
     @HostListener('touchend') touchend = (): void => this.finish();
 
     @HostListener('scroll', ['$event']) scroll = (e): void => {
         this._scrollLeft = e.target.scrollLeft;
         this._scrollTop = e.target.scrollTop;
     }
+
+    /** the bug-fix to prevent dragging images while swiping */
+    @HostListener('document:dragstart', ['$event']) dragstart = (e): void => e.preventDefault();
 
     get changed(): boolean {
         let result = false;
