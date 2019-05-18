@@ -1,11 +1,17 @@
-import { IPositionEvent } from './interfaces';
+import { IPositionEvent } from './position-event';
 
-export const touchPredicate = (e, key: keyof IPositionEvent): number => e && key && e.touches && e.touches[0] && e.touches[0][key];
+const getFirstTouch = (e, key: keyof IPositionEvent): number => e && key && e.touches && e.touches[0] && e.touches[0][key];
 
-export const clickPredicate = (e, key: keyof IPositionEvent): number => e && key && e[key];
-
-export const getPositions = (originalEvent): IPositionEvent => {
-    const clientX = touchPredicate(originalEvent, 'clientX') || clickPredicate(originalEvent, 'clientX');
-    const clientY = touchPredicate(originalEvent, 'clientY') || clickPredicate(originalEvent, 'clientY');
-    return { clientX, clientY, originalEvent };
+export const getClickPositions = (event): IPositionEvent => {
+    const clientX = event.clientX;
+    const clientY = event.clientY;
+    return { clientX, clientY };
 };
+
+export const getTouchPositions = (event): IPositionEvent => {
+    const clientX = getFirstTouch(event, 'clientX');
+    const clientY = getFirstTouch(event, 'clientY');
+    return { clientX, clientY };
+};
+
+export const isNumber = x => typeof x === 'number' && !isNaN(x);

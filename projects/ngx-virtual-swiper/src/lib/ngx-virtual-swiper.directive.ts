@@ -1,10 +1,10 @@
+import { Directionality } from '@angular/cdk/bidi';
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
-import { ContentChild, Directive, HostListener, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
+import { ContentChild, Directive, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Optional } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { isNumber } from 'util';
-import { NgxVirtualSwiperOptions } from './constants';
-import { INgxVirtualSwiperOptions, IPositionEvent } from './interfaces';
-import { getPositions } from './utils';
+import { NgxVirtualSwiperOptions } from './options';
+import { IPositionEvent } from './position-event';
+import { getClickPositions, getTouchPositions, isNumber } from './utils';
 
 @Directive({
     selector: '[ngxVirtualSwiper]'
@@ -13,12 +13,11 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
 
     /** to lean more see https://material.angular.io/cdk/scrolling/api */
     @ContentChild(CdkVirtualScrollViewport) readonly cdk: CdkVirtualScrollViewport;
-    @Input('ngxVirtualSwiper') options: Partial<INgxVirtualSwiperOptions>;
     @Input() itemSize: number;
     readonly subscription = new Subscription();
     _index: number;
     _halfItemSize: number;
-    _isSwiped: boolean;
+    _swiped: boolean;
     _clientX: number;
     _clientY: number;
     _prevClientX: number;
@@ -26,12 +25,14 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
     /** Absolute scrolling by Y axis */
     _scrollTop: number;
     /** Absolute scrolling by X axis */
-    _scrollLeft: number;
+    _scrollX: number;
 
-    constructor() { }
+    constructor(
+        @Optional() @Inject(Directionality) private dir: Directionality,
+        @Inject(NgxVirtualSwiperOptions) private options: NgxVirtualSwiperOptions
+    ) { }
 
     ngOnChanges(): void {
-        this.options = { ...NgxVirtualSwiperOptions, ...this.options };
         this._halfItemSize = this.itemSize / 2;
     }
 
@@ -48,21 +49,25 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
         this.subscription.unsubscribe();
     }
 
-    @HostListener('mousedown', ['$event']) mousedown = (e): void => this.start(getPositions(e));
+    @HostListener('mousedown', ['$event']) mousedown = (e) => this.start(getClickPositions(e));
 
-    @HostListener('touchstart', ['$event']) touchstart = (e): void => this.start(getPositions(e));
+    @HostListener('touchstart', ['$event']) touchstart = (e) => this.start(getTouchPositions(e));
 
-    @HostListener('mousemove', ['$event']) mousemove = (e): void => this.move(getPositions(e));
+    @HostListener('mousemove', ['$event']) mousemove = (e) => this.move(getClickPositions(e));
 
-    @HostListener('touchmove', ['$event']) touchmove = (e): void => this.move(getPositions(e));
-
-    @HostListener('document:mouseup') mouseup = (): void => this.finish();
-
-    @HostListener('touchend') touchend = (): void => this.finish();
+    @HostListener('touchmove', ['$event']) touchmove = (e) => this.move(getTouchPositions(e));
 
     @HostListener('scroll', ['$event']) scroll = (e): void => {
-        this._scrollLeft = e.target.scrollLeft;
+        this._scrollX = this.rtl ? e.target.scrollWidth - e.target.scrollLeft - this.cdk.getViewportSize() : e.target.scrollLeft;
         this._scrollTop = e.target.scrollTop;
+    }
+
+    @HostListener('document:mouseup')
+    @HostListener('touchend') finish = (): void => {
+        if (this._swiped) {
+            this.toggleSwiped(false);
+            this.finalize();
+        }
     }
 
     /** the bug-fix to prevent dragging images while swiping */
@@ -81,11 +86,17 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
         return result;
     }
 
+    get rtl() {
+        return this.dir && this.dir.value === 'rtl';
+    }
+
     _mousemoveX = (e: IPositionEvent): void => {
         if (e) {
             const offset = this.cdk.measureScrollOffset();
-            const value = offset - e.clientX + this._clientX;
-            this.cdk.scrollToOffset(value);
+            const c = this.rtl ? -1 : 1;
+            const delta = (this._clientX - e.clientX) * c;
+            const value = offset + delta;
+            this.cdk.scrollToOffset(Math.abs(value));
             this._clientX = e.clientX;
         }
     }
@@ -108,7 +119,7 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
     }
 
     move = (e: IPositionEvent): void => {
-        if (this._isSwiped) {
+        if (this._swiped) {
             if (this.cdk.orientation === 'horizontal') {
                 this._mousemoveX(e);
             }
@@ -118,15 +129,8 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
         }
     }
 
-    finish = (): void => {
-        if (this._isSwiped) {
-            this.toggleSwiped(false);
-            this.finalize();
-        }
-    }
-
     toggleSwiped = (value: boolean): void => {
-        this._isSwiped = value;
+        this._swiped = value;
     }
 
     finalize = (): void => {
@@ -136,7 +140,7 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
     }
 
     scrollToNearestIndex = (): void => {
-        const scrolledAbs = this.cdk.orientation === 'horizontal' ? this._scrollLeft :
+        const scrolledAbs = this.cdk.orientation === 'horizontal' ? this._scrollX :
             this.cdk.orientation === 'vertical' ? this._scrollTop :
                 null;
         if (isNumber(scrolledAbs) && isNumber(this._halfItemSize)) {

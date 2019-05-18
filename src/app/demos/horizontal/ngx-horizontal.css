@@ -2,6 +2,7 @@
     height: 300px;
     width: 500px;
     border: 1px solid black;
+    user-select: none;
 }
 
     .cdk-virtual-scroll-data-source-example .example-viewport .cdk-virtual-scroll-content-wrapper {
