@@ -6,13 +6,14 @@
     "swipe",
     "swiper",
     "angular",
-    "angular7",
     "virtual",
     "scrolling",
     "scrollable",
     "cdk",
     "angular-swiper",
+    "angular-swipe",
     "virtual-swiper",
+    "virtual-swipe",
     "ngx-virtual-swiper"
   ],
   "repository": {

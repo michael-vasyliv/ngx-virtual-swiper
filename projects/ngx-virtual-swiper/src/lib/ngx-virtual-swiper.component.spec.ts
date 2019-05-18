@@ -1,5 +1,6 @@
 import { Directionality } from '@angular/cdk/bidi';
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
+import { ElementRef } from '@angular/core';
 import { of, Subscription } from 'rxjs';
 import { NgxVirtualSwiperDirective } from './ngx-virtual-swiper.directive';
 import { NgxVirtualSwiperOptions } from './options';
@@ -12,8 +13,7 @@ describe('NgxVirtualSwiperDirective', () => {
     let event: IPositionEvent;
     const scrollEvent = { target: { scrollLeft: 100, scrollTop: 200 } };
     let cdk: jasmine.SpyObj<CdkVirtualScrollViewport>;
-    let dir: Directionality;
-    let options = new NgxVirtualSwiperOptions();
+    const options = new NgxVirtualSwiperOptions();
 
     beforeEach(() => {
         event = { clientX: 100, clientY: 200 };
@@ -21,8 +21,8 @@ describe('NgxVirtualSwiperDirective', () => {
             'scrollToOffset',
             'measureScrollOffset',
             'scrollToIndex'
-        ])
-        directive = new NgxVirtualSwiperDirective(dir, options);
+        ]);
+        directive = new NgxVirtualSwiperDirective(null, options);
     });
 
     it('has subscription', () => {
@@ -49,10 +49,10 @@ describe('NgxVirtualSwiperDirective', () => {
 
     describe('with cdk', () => {
 
-        let scrolledIndexChangeSpy = jasmine.createSpy('scrolledIndexChange', () => of(null));
+        const scrolledIndexChangeSpy = jasmine.createSpy('scrolledIndexChange', () => of(null));
 
         beforeEach(() => {
-            Object.defineProperty(cdk, 'scrolledIndexChange', { get: () => scrolledIndexChangeSpy })
+            Object.defineProperty(cdk, 'scrolledIndexChange', { get: () => scrolledIndexChangeSpy });
             Object.defineProperty(directive, 'cdk', { get: () => cdk });
         });
 
@@ -66,6 +66,44 @@ describe('NgxVirtualSwiperDirective', () => {
             expect(directive.subscription.add).toHaveBeenCalled();
             expect(directive._index).toEqual(index);
         });
+        it('mousedown', () => {
+            spyOn(directive, 'start');
+            directive.mousedown(event);
+            expect(directive.start).toHaveBeenCalledWith(event);
+        });
+        it('touchstart', () => {
+            spyOn(directive, 'start');
+            directive.touchstart({ touches: [event] });
+            expect(directive.start).toHaveBeenCalledWith(event);
+        });
+        it('mousemove', () => {
+            spyOn(directive, 'move');
+            directive.mousemove(event);
+            expect(directive.move).toHaveBeenCalledWith(event);
+        });
+        it('touchmove', () => {
+            spyOn(directive, 'move');
+            directive.touchmove({ touches: [event] });
+            expect(directive.move).toHaveBeenCalledWith(event);
+        });
+        it('scroll, should set scroll variables', () => {
+            directive.scroll(scrollEvent);
+            expect(directive._scrollX).toEqual(scrollEvent.target.scrollLeft);
+            expect(directive._scrollTop).toEqual(scrollEvent.target.scrollTop);
+        });
+        it('finish, should call toggleSwiped, finalize', () => {
+            spyOn(directive, 'toggleSwiped');
+            spyOn(directive, 'finalize');
+            directive._swiped = true;
+            directive.finish();
+            expect(directive.toggleSwiped).toHaveBeenCalledWith(false);
+            expect(directive.finalize).toHaveBeenCalled();
+        });
+        it('dragstart', () => {
+            const preventDefault = jasmine.createSpy();
+            directive.dragstart({ preventDefault });
+            expect(preventDefault).toHaveBeenCalled();
+        });
 
         describe('changed', () => {
 
@@ -78,6 +116,17 @@ describe('NgxVirtualSwiperDirective', () => {
                 directive._prevClientY = 100;
                 directive._clientY = 300;
                 expect(directive.changed).toEqual(true);
+            });
+        });
+
+        describe('rtl', () => {
+
+            it('undefined', () => {
+                expect(directive.rtl).toBeNull();
+            });
+            it('true', () => {
+                directive = new NgxVirtualSwiperDirective({ value: 'rtl' } as Directionality, options);
+                expect(directive.rtl).toEqual(true);
             });
         });
 
@@ -101,8 +150,17 @@ describe('NgxVirtualSwiperDirective', () => {
             expect(directive.cdk.scrollToOffset).toHaveBeenCalledWith(offset - event.clientY + _clientY);
             expect(directive._clientY).toEqual(event.clientY);
         });
+        it('start', () => {
+            spyOn(directive, 'toggleSwiped');
+            directive.start(event);
+            expect(directive.toggleSwiped).toHaveBeenCalledWith(true);
+            expect(directive._clientX).toEqual(event.clientX);
+            expect(directive._clientY).toEqual(event.clientY);
+            expect(directive._prevClientX).toEqual(event.clientX);
+            expect(directive._prevClientY).toEqual(event.clientY);
+        });
 
-        describe('mousemove', () => {
+        describe('move', () => {
 
             it('shoould call _mousemoveX', () => {
                 spyOn(directive, '_mousemoveX');
@@ -120,26 +178,6 @@ describe('NgxVirtualSwiperDirective', () => {
             });
         });
 
-        it('mousedown, should save position of cursor and call preventDefault', () => {
-            spyOn(directive, 'toggleSwiped');
-            directive.start(event);
-            expect(directive.toggleSwiped).toHaveBeenCalledWith(true);
-            expect(directive._clientX).toEqual(event.clientX);
-            expect(directive._clientY).toEqual(event.clientY);
-            expect(directive._prevClientX).toEqual(event.clientX);
-            expect(directive._prevClientY).toEqual(event.clientY);
-        });
-        it('mouseup, should call toggleSwiped', () => {
-            spyOn(directive, 'toggleSwiped');
-            directive._swiped = true;
-            directive.finish();
-            expect(directive.toggleSwiped).toHaveBeenCalledWith(false);
-        });
-        it('scroll, should set scroll variables', () => {
-            directive.scroll(scrollEvent);
-            expect(directive._scrollX).toEqual(scrollEvent.target.scrollLeft);
-            expect(directive._scrollTop).toEqual(scrollEvent.target.scrollTop);
-        });
         it('toggleSwiped, should set a value to _isSwiped', () => {
             const value = true;
             directive.toggleSwiped(value);
@@ -181,5 +219,33 @@ describe('NgxVirtualSwiperDirective', () => {
                 expect(directive.cdk.scrollToIndex).not.toHaveBeenCalled();
             });
         });
+
+        describe('set up nativeElement', () => {
+
+            let element: jasmine.SpyObj<Document>;
+
+            beforeEach(() => {
+                element = jasmine.createSpyObj<Document>('Document', ['addEventListener', 'removeEventListener']);
+                Object.defineProperty(cdk, 'elementRef', { get: () => new ElementRef(element) });
+            });
+
+            it('addEventListener', () => {
+                directive.addEventListener();
+                expect(element.addEventListener).toHaveBeenCalledWith('click', directive.preventClicks, true);
+            });
+            it('removeEventListener', () => {
+                directive.removeEventListener();
+                expect(element.removeEventListener).toHaveBeenCalledWith('click', directive.preventClicks, true);
+            });
+        });
+    });
+
+    it('preventClicks', () => {
+        const e = jasmine.createSpyObj<MouseEvent>('MouseEvent', ['stopPropagation', 'preventDefault', 'stopImmediatePropagation']);
+        Object.defineProperty(directive, 'changed', { get: () => true });
+        directive.preventClicks(e);
+        expect(e.stopPropagation).toHaveBeenCalled();
+        expect(e.preventDefault).toHaveBeenCalled();
+        expect(e.stopImmediatePropagation).toHaveBeenCalled();
     });
 });
