@@ -12,7 +12,7 @@ import { getClickPositions, getTouchPositions, isNumber } from './utils';
 export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
 
     /** to lean more see https://material.angular.io/cdk/scrolling/api */
-    @ContentChild(CdkVirtualScrollViewport) readonly cdk: CdkVirtualScrollViewport;
+    @ContentChild(CdkVirtualScrollViewport, { static: true }) readonly cdk: CdkVirtualScrollViewport;
     @Input() itemSize: number;
     readonly subscription = new Subscription();
     _index: number;
