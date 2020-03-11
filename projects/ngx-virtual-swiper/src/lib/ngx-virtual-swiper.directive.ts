@@ -1,6 +1,6 @@
 import { Directionality } from '@angular/cdk/bidi';
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
-import { ContentChild, Directive, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Optional } from '@angular/core';
+import { Directive, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Optional } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { NgxVirtualSwiperOptions } from './options';
 import { IPositionEvent } from './position-event';
