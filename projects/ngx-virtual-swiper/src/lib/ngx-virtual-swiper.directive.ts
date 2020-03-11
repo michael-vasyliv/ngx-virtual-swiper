@@ -11,8 +11,6 @@ import { getClickPositions, getTouchPositions, isNumber } from './utils';
 })
 export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
 
-    /** to lean more see https://material.angular.io/cdk/scrolling/api */
-    @ContentChild(CdkVirtualScrollViewport, { static: true }) readonly cdk: CdkVirtualScrollViewport;
     @Input() itemSize: number;
     readonly subscription = new Subscription();
     _index: number;
@@ -29,7 +27,9 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
 
     constructor(
         @Optional() @Inject(Directionality) private dir: Directionality,
-        @Inject(NgxVirtualSwiperOptions) private options: NgxVirtualSwiperOptions
+        @Inject(NgxVirtualSwiperOptions) private options: NgxVirtualSwiperOptions,
+        /** to lean more see https://material.angular.io/cdk/scrolling/api */
+        @Inject(CdkVirtualScrollViewport) private cdk: CdkVirtualScrollViewport
     ) { }
 
     ngOnChanges(): void {
@@ -37,9 +37,6 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        if (!this.cdk) {
-            throw new Error('CdkVirtualScrollViewport is not present.');
-        }
         this.addEventListener();
         this.subscription.add(this.cdk.scrolledIndexChange.subscribe(i => this._index = i));
     }
@@ -87,7 +84,7 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
     }
 
     get rtl() {
-        return this.dir && this.dir.value === 'rtl';
+        return this.dir?.value === 'rtl';
     }
 
     _mousemoveX = (e: IPositionEvent): void => {
