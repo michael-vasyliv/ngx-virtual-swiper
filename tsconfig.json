@@ -21,10 +21,8 @@
     ],
     "paths": {
       "ngx-virtual-swiper": [
+        "dist/ngx-virtual-swiper/ngx-virtual-swiper",
         "dist/ngx-virtual-swiper"
-      ],
-      "ngx-virtual-swiper/*": [
-        "dist/ngx-virtual-swiper/*"
       ]
     }
   }

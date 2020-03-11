@@ -1,6 +1,6 @@
 {
   "name": "ngx-virtual-swiper",
-  "version": "8.0.0",
+  "version": "9.0.0",
   "license": "MIT",
   "keywords": [
     "swipe",
@@ -25,9 +25,9 @@
   },
   "homepage": "https://github.com/vasyliv/ngx-virtual-swiper",
   "peerDependencies": {
-    "@angular/cdk": "^8.0.0",
-    "@angular/common": "^8.0.0",
-    "@angular/core": "^8.0.0",
-    "rxjs": "^6.5.2"
+    "@angular/cdk": "^9.0.0",
+    "@angular/common": "^9.0.0",
+    "@angular/core": "^9.0.0",
+    "rxjs": "^6.5.4"
   }
 }

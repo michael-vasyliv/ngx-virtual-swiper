@@ -1,16 +1,16 @@
 import { IPositionEvent } from './position-event';
 
-const getFirstTouch = (e, key: keyof IPositionEvent): number => e && key && e.touches && e.touches[0] && e.touches[0][key];
+const getFirstTouch = (e, key: keyof IPositionEvent): number => e?.touches?.[0]?.[key];
 
-export const getClickPositions = (event): IPositionEvent => {
-    const clientX = event.clientX;
-    const clientY = event.clientY;
+export const getClickPositions = (e): IPositionEvent => {
+    const clientX = e.clientX;
+    const clientY = e.clientY;
     return { clientX, clientY };
 };
 
-export const getTouchPositions = (event): IPositionEvent => {
-    const clientX = getFirstTouch(event, 'clientX');
-    const clientY = getFirstTouch(event, 'clientY');
+export const getTouchPositions = (e): IPositionEvent => {
+    const clientX = getFirstTouch(e, 'clientX');
+    const clientY = getFirstTouch(e, 'clientY');
     return { clientX, clientY };
 };
 

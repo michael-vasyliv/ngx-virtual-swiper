@@ -22,7 +22,8 @@ describe('NgxVirtualSwiperDirective', () => {
             'measureScrollOffset',
             'scrollToIndex'
         ]);
-        directive = new NgxVirtualSwiperDirective(null, options);
+
+        directive = new NgxVirtualSwiperDirective(null, options, cdk);
     });
 
     it('has subscription', () => {
@@ -36,9 +37,6 @@ describe('NgxVirtualSwiperDirective', () => {
             directive.ngOnChanges();
             expect(directive._halfItemSize).toEqual(50);
         });
-        it('ngOnInit, should be the error', () => {
-            expect(() => directive.ngOnInit()).toThrow(new Error('CdkVirtualScrollViewport is not present.'));
-        });
         it('ngOnDestroy, should call unsubscribe', () => {
             spyOn(directive, 'removeEventListener');
             directive.ngOnDestroy();
@@ -49,18 +47,11 @@ describe('NgxVirtualSwiperDirective', () => {
 
     describe('with cdk', () => {
 
-        const scrolledIndexChangeSpy = jasmine.createSpy('scrolledIndexChange', () => of(null));
-
-        beforeEach(() => {
-            Object.defineProperty(cdk, 'scrolledIndexChange', { get: () => scrolledIndexChangeSpy });
-            Object.defineProperty(directive, 'cdk', { get: () => cdk });
-        });
-
         it('ngOnInit, should subscribe on index change and set the _index', () => {
             const index = 1;
             spyOn(directive.subscription, 'add');
             spyOn(directive, 'addEventListener');
-            spyOnProperty(directive.cdk, 'scrolledIndexChange', 'get').and.returnValue(of(index));
+            Object.defineProperty(cdk, 'scrolledIndexChange', { get() { return of(index); } });
             directive.ngOnInit();
             expect(directive.addEventListener).toHaveBeenCalled();
             expect(directive.subscription.add).toHaveBeenCalled();
@@ -122,10 +113,10 @@ describe('NgxVirtualSwiperDirective', () => {
         describe('rtl', () => {
 
             it('undefined', () => {
-                expect(directive.rtl).toBeNull();
+                expect(directive.rtl).toEqual(false);
             });
             it('true', () => {
-                directive = new NgxVirtualSwiperDirective({ value: 'rtl' } as Directionality, options);
+                directive = new NgxVirtualSwiperDirective({ value: 'rtl' } as Directionality, options, cdk);
                 expect(directive.rtl).toEqual(true);
             });
         });
@@ -136,8 +127,8 @@ describe('NgxVirtualSwiperDirective', () => {
             cdk.measureScrollOffset.and.returnValue(offset);
             directive._clientX = _clientX;
             directive._mousemoveX(event);
-            expect(directive.cdk.measureScrollOffset).toHaveBeenCalled();
-            expect(directive.cdk.scrollToOffset).toHaveBeenCalledWith(offset - event.clientX + _clientX);
+            expect(cdk.measureScrollOffset).toHaveBeenCalled();
+            expect(cdk.scrollToOffset).toHaveBeenCalledWith(offset - event.clientX + _clientX);
             expect(directive._clientX).toEqual(event.clientX);
         });
         it('_mousemoveY, should move to offset and set _clientY', () => {
@@ -146,8 +137,8 @@ describe('NgxVirtualSwiperDirective', () => {
             cdk.measureScrollOffset.and.returnValue(offset);
             directive._clientY = _clientY;
             directive._mousemoveY(event);
-            expect(directive.cdk.measureScrollOffset).toHaveBeenCalled();
-            expect(directive.cdk.scrollToOffset).toHaveBeenCalledWith(offset - event.clientY + _clientY);
+            expect(cdk.measureScrollOffset).toHaveBeenCalled();
+            expect(cdk.scrollToOffset).toHaveBeenCalledWith(offset - event.clientY + _clientY);
             expect(directive._clientY).toEqual(event.clientY);
         });
         it('start', () => {
@@ -165,14 +156,14 @@ describe('NgxVirtualSwiperDirective', () => {
             it('shoould call _mousemoveX', () => {
                 spyOn(directive, '_mousemoveX');
                 directive._swiped = true;
-                directive.cdk.orientation = 'horizontal';
+                cdk.orientation = 'horizontal';
                 directive.move(event);
                 expect(directive._mousemoveX).toHaveBeenCalledWith(event);
             });
             it('shoould call _mousemoveY', () => {
                 spyOn(directive, '_mousemoveY');
                 directive._swiped = true;
-                directive.cdk.orientation = 'vertical';
+                cdk.orientation = 'vertical';
                 directive.move(event);
                 expect(directive._mousemoveY).toHaveBeenCalledWith(event);
             });
@@ -196,27 +187,27 @@ describe('NgxVirtualSwiperDirective', () => {
             });
 
             it('horizontal', () => {
-                directive.cdk.orientation = 'horizontal';
+                cdk.orientation = 'horizontal';
                 directive._scrollX = scrollEvent.target.scrollLeft;
                 directive.scrollToNearestIndex();
-                expect(directive.cdk.scrollToIndex).toHaveBeenCalledWith(directive._index, 'smooth');
+                expect(cdk.scrollToIndex).toHaveBeenCalledWith(directive._index, 'smooth');
             });
             it('vertical', () => {
-                directive.cdk.orientation = 'vertical';
+                cdk.orientation = 'vertical';
                 directive._scrollTop = scrollEvent.target.scrollTop;
                 directive.scrollToNearestIndex();
-                expect(directive.cdk.scrollToIndex).toHaveBeenCalledWith(directive._index, 'smooth');
+                expect(cdk.scrollToIndex).toHaveBeenCalledWith(directive._index, 'smooth');
             });
             it('null', () => {
                 directive.scrollToNearestIndex();
-                expect(directive.cdk.scrollToIndex).not.toHaveBeenCalled();
+                expect(cdk.scrollToIndex).not.toHaveBeenCalled();
             });
             it('_scrollTop === null', () => {
-                directive.cdk.orientation = 'vertical';
+                cdk.orientation = 'vertical';
                 directive._scrollTop = scrollEvent.target.scrollTop;
                 directive._halfItemSize = null;
                 directive.scrollToNearestIndex();
-                expect(directive.cdk.scrollToIndex).not.toHaveBeenCalled();
+                expect(cdk.scrollToIndex).not.toHaveBeenCalled();
             });
         });
 
