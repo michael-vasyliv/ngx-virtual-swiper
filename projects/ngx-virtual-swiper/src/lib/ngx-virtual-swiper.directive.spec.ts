@@ -51,7 +51,7 @@ describe('NgxVirtualSwiperDirective', () => {
             const index = 1;
             spyOn(directive.subscription, 'add');
             spyOn(directive, 'addEventListener');
-            Object.defineProperty(cdk, 'scrolledIndexChange', { get() { return of(index) } });
+            Object.defineProperty(cdk, 'scrolledIndexChange', { get() { return of(index); } });
             directive.ngOnInit();
             expect(directive.addEventListener).toHaveBeenCalled();
             expect(directive.subscription.add).toHaveBeenCalled();
