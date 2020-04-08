@@ -9,14 +9,14 @@ Swiper with virtual scroll.
   <a href="https://www.npmjs.com/package/ngx-virtual-swiper">
     <img alt="npm" src="https://img.shields.io/npm/dm/ngx-virtual-swiper.svg">
   </a>
-  <a href="https://github.com/vasyliv/ngx-virtual-swiper/blob/master/LICENSE">
+  <a href="https://github.com/michael-vasyliv/ngx-virtual-swiper/blob/master/LICENSE">
     <img alt="licence" src="https://img.shields.io/npm/l/ngx-virtual-swiper.svg">
   </a>
 </p>
 
 ## [Demo](https://stackblitz.com/edit/angular-kw59pk)
 
-## [Examples](https://github.com/vasyliv/ngx-virtual-swiper/tree/master/src/app/demos)
+## [Examples](https://github.com/michael-vasyliv/ngx-virtual-swiper/tree/master/src/app/demos)
 
 ## Getting Started
 
@@ -39,7 +39,7 @@ import { NgxVirtualSwiperModule } from 'ngx-virtual-swiper';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 
 @NgModule({
-  imports: [ 
+  imports: [
     ...
     ScrollingModule,
     NgxVirtualSwiperModule,
@@ -52,4 +52,4 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 
 `ngx-virtual-swiper` depeneds on the following libraries to work.
 
-* [@angular/material](https://material.angular.io/cdk/scrolling/api)
+* [@angular/cdk](https://material.angular.io/cdk/scrolling/api)
