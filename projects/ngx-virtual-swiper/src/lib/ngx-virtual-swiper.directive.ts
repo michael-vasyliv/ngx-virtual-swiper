@@ -1,6 +1,6 @@
 import { Directionality } from '@angular/cdk/bidi';
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
-import { Directive, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Optional } from '@angular/core';
+import { Directive, HostListener, Inject, Input, OnDestroy, OnInit, Optional } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { NgxVirtualSwiperOptions } from './options';
 import { IPositionEvent } from './position-event';
@@ -9,21 +9,16 @@ import { getClickPositions, getTouchPositions, isNumber } from './utils';
 @Directive({
     selector: '[ngxVirtualSwiper]'
 })
-export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
+export class NgxVirtualSwiperDirective implements OnInit, OnDestroy {
 
     @Input() itemSize: number;
     readonly subscription = new Subscription();
     _index: number;
-    _halfItemSize: number;
     _swiped: boolean;
     _clientX: number;
     _clientY: number;
     _prevClientX: number;
     _prevClientY: number;
-    /** Absolute scrolling by Y axis */
-    _scrollTop: number;
-    /** Absolute scrolling by X axis */
-    _scrollX: number;
 
     constructor(
         @Optional() @Inject(Directionality) private dir: Directionality,
@@ -31,10 +26,6 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
         /** to lean more see https://material.angular.io/cdk/scrolling/api */
         @Inject(CdkVirtualScrollViewport) private cdk: CdkVirtualScrollViewport
     ) { }
-
-    ngOnChanges(): void {
-        this._halfItemSize = this.itemSize / 2;
-    }
 
     ngOnInit(): void {
         this.addEventListener();
@@ -53,11 +44,6 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
     @HostListener('mousemove', ['$event']) mousemove = (e) => this.move(getClickPositions(e));
 
     @HostListener('touchmove', ['$event']) touchmove = (e) => this.move(getTouchPositions(e));
-
-    @HostListener('scroll', ['$event']) scroll = (e): void => {
-        this._scrollX = this.rtl ? e.target.scrollWidth - e.target.scrollLeft - this.cdk.getViewportSize() : e.target.scrollLeft;
-        this._scrollTop = e.target.scrollTop;
-    }
 
     @HostListener('document:mouseup')
     @HostListener('touchend') finish = (): void => {
@@ -137,12 +123,12 @@ export class NgxVirtualSwiperDirective implements OnChanges, OnInit, OnDestroy {
     }
 
     scrollToNearestIndex = (): void => {
-        const scrolledAbs = this.cdk.orientation === 'horizontal' ? this._scrollX :
-            this.cdk.orientation === 'vertical' ? this._scrollTop :
+        const delta = this.cdk.orientation === 'horizontal' ? this._prevClientX - this._clientX :
+            this.cdk.orientation === 'vertical' ? this._prevClientY - this._clientY :
                 null;
-        if (isNumber(scrolledAbs) && isNumber(this._halfItemSize)) {
-            const scrolled = scrolledAbs - this.itemSize * this._index;
-            const index = scrolled > this._halfItemSize ? this._index + 1 : this._index;
+        if (isNumber(delta)) {
+            const directionDelta = this.rtl ? delta * -1 : delta;
+            const index = directionDelta > 0 && Math.abs(directionDelta) >= this.options.threshold ? this._index + 1 : this._index;
             this.cdk.scrollToIndex(index, 'smooth');
         }
     }

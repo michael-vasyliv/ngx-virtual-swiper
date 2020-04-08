@@ -1,6 +1,6 @@
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { async, TestBed } from '@angular/core/testing';
-import { NgxVirtualSwiperModule } from 'projects/ngx-virtual-swiper/src/public_api';
+import { NgxVirtualSwiperModule } from '../../projects/ngx-virtual-swiper/src/public-api';
 import { AppComponent } from './app.component';
 import { NgxDataSourceComponent } from './demos/data.source/ngx-data-source';
 import { NgxHorizontalComponent } from './demos/horizontal/ngx-horizontal';
