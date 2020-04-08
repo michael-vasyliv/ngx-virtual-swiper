@@ -32,11 +32,6 @@ describe('NgxVirtualSwiperDirective', () => {
 
     describe('without cdk', () => {
 
-        it('ngOnChanges, should have default values', () => {
-            directive.itemSize = 100;
-            directive.ngOnChanges();
-            expect(directive._halfItemSize).toEqual(50);
-        });
         it('ngOnDestroy, should call unsubscribe', () => {
             spyOn(directive, 'removeEventListener');
             directive.ngOnDestroy();
@@ -76,11 +71,6 @@ describe('NgxVirtualSwiperDirective', () => {
             spyOn(directive, 'move');
             directive.touchmove({ touches: [event] });
             expect(directive.move).toHaveBeenCalledWith(event);
-        });
-        it('scroll, should set scroll variables', () => {
-            directive.scroll(scrollEvent);
-            expect(directive._scrollX).toEqual(scrollEvent.target.scrollLeft);
-            expect(directive._scrollTop).toEqual(scrollEvent.target.scrollTop);
         });
         it('finish, should call toggleSwiped, finalize', () => {
             spyOn(directive, 'toggleSwiped');
@@ -182,30 +172,42 @@ describe('NgxVirtualSwiperDirective', () => {
 
         describe('scrollToNearestIndex, should call scrollToIndex', () => {
 
+            const threshold = 30;
+
             beforeEach(() => {
-                directive._halfItemSize = 25;
+
+                directive._index = 1;
             });
 
-            it('horizontal', () => {
+            it('horizontal the same index', () => {
                 cdk.orientation = 'horizontal';
-                directive._scrollX = scrollEvent.target.scrollLeft;
+                directive._clientX = scrollEvent.target.scrollLeft;
+                directive._prevClientX = scrollEvent.target.scrollLeft - threshold;
                 directive.scrollToNearestIndex();
-                expect(cdk.scrollToIndex).toHaveBeenCalledWith(directive._index, 'smooth');
+                expect(cdk.scrollToIndex).toHaveBeenCalledWith(1, 'smooth');
             });
-            it('vertical', () => {
-                cdk.orientation = 'vertical';
-                directive._scrollTop = scrollEvent.target.scrollTop;
+            it('horizontal next index', () => {
+                cdk.orientation = 'horizontal';
+                directive._clientX = scrollEvent.target.scrollLeft;
+                directive._prevClientX = scrollEvent.target.scrollLeft + threshold;
                 directive.scrollToNearestIndex();
-                expect(cdk.scrollToIndex).toHaveBeenCalledWith(directive._index, 'smooth');
+                expect(cdk.scrollToIndex).toHaveBeenCalledWith(2, 'smooth');
+            });
+            it('vertical the same index', () => {
+                cdk.orientation = 'vertical';
+                directive._clientY = scrollEvent.target.scrollTop;
+                directive._prevClientY = scrollEvent.target.scrollTop - threshold;
+                directive.scrollToNearestIndex();
+                expect(cdk.scrollToIndex).toHaveBeenCalledWith(1, 'smooth');
+            });
+            it('vertical next index', () => {
+                cdk.orientation = 'vertical';
+                directive._clientY = scrollEvent.target.scrollTop;
+                directive._prevClientY = scrollEvent.target.scrollTop + threshold;
+                directive.scrollToNearestIndex();
+                expect(cdk.scrollToIndex).toHaveBeenCalledWith(2, 'smooth');
             });
             it('null', () => {
-                directive.scrollToNearestIndex();
-                expect(cdk.scrollToIndex).not.toHaveBeenCalled();
-            });
-            it('_scrollTop === null', () => {
-                cdk.orientation = 'vertical';
-                directive._scrollTop = scrollEvent.target.scrollTop;
-                directive._halfItemSize = null;
                 directive.scrollToNearestIndex();
                 expect(cdk.scrollToIndex).not.toHaveBeenCalled();
             });
