@@ -6,19 +6,22 @@ import { NgxVirtualSwiperOptions } from './options';
 import { IPositionEvent } from './position-event';
 import { getClickPositions, getTouchPositions, isNumber } from './utils';
 
+const VERTICAL_ORIENTATION = 'vertical';
+const HORIZONTAL_ORIENTATION = 'horizontal';
+
 @Directive({
     selector: '[ngxVirtualSwiper]'
 })
 export class NgxVirtualSwiperDirective implements OnInit, OnDestroy {
 
-    @Input() itemSize: number;
-    readonly subscription = new Subscription();
-    _index: number;
-    _swiped: boolean;
-    _clientX: number;
-    _clientY: number;
-    _prevClientX: number;
-    _prevClientY: number;
+    @Input() public itemSize: number;
+    public readonly subscription = new Subscription();
+    public index: number;
+    public swiped: boolean;
+    public clientX: number;
+    public clientY: number;
+    public prevClientX: number;
+    public prevClientY: number;
 
     constructor(
         @Optional() @Inject(Directionality) private dir: Directionality,
@@ -27,122 +30,130 @@ export class NgxVirtualSwiperDirective implements OnInit, OnDestroy {
         @Inject(CdkVirtualScrollViewport) private cdk: CdkVirtualScrollViewport
     ) { }
 
-    ngOnInit(): void {
+    public ngOnInit(): void {
         this.addEventListener();
-        this.subscription.add(this.cdk.scrolledIndexChange.subscribe(i => this._index = i));
+        this.subscription.add(this.cdk.scrolledIndexChange.subscribe(i => this.index = i));
     }
 
-    ngOnDestroy(): void {
+    public ngOnDestroy(): void {
         this.removeEventListener();
         this.subscription.unsubscribe();
     }
 
-    @HostListener('mousedown', ['$event']) mousedown = (e) => this.start(getClickPositions(e));
+    @HostListener('mousedown', ['$event']) public onMousedown = (e): void => this.start(getClickPositions(e));
 
-    @HostListener('touchstart', ['$event']) touchstart = (e) => this.start(getTouchPositions(e));
+    @HostListener('touchstart', ['$event']) public onMouchstart = (e): void => this.start(getTouchPositions(e));
 
-    @HostListener('mousemove', ['$event']) mousemove = (e) => this.move(getClickPositions(e));
+    @HostListener('mousemove', ['$event']) public onMousemove = (e): void => this.move(getClickPositions(e));
 
-    @HostListener('touchmove', ['$event']) touchmove = (e) => this.move(getTouchPositions(e));
+    @HostListener('touchmove', ['$event']) public onTouchmove = (e): void => this.move(getTouchPositions(e));
 
     @HostListener('document:mouseup')
-    @HostListener('touchend') finish = (): void => {
-        if (this._swiped) {
+    @HostListener('touchend') public onFinish = (): void => {
+        if (this.swiped) {
             this.toggleSwiped(false);
             this.finalize();
         }
     }
 
     /** the bug-fix to prevent dragging images while swiping */
-    @HostListener('document:dragstart', ['$event']) dragstart = (e): void => e.preventDefault();
+    @HostListener('document:dragstart', ['$event']) public onDragstart = (e): void => e.preventDefault();
 
-    get changed(): boolean {
+    public get changed(): boolean {
         let result = false;
-        if (isNumber(this._prevClientX) && isNumber(this.options.threshold)) {
-            const deltaX = Math.abs(this._prevClientX - this._clientX);
+        if (isNumber(this.prevClientX) && isNumber(this.options.threshold)) {
+            const deltaX = Math.abs(this.prevClientX - this.clientX);
             result = deltaX >= this.options.threshold;
         }
-        if (isNumber(this._prevClientY) && isNumber(this.options.threshold)) {
-            const deltaY = Math.abs(this._prevClientY - this._clientY);
+        if (isNumber(this.prevClientY) && isNumber(this.options.threshold)) {
+            const deltaY = Math.abs(this.prevClientY - this.clientY);
             result = result || deltaY >= this.options.threshold;
         }
         return result;
     }
 
-    get rtl() {
+    public get rtl(): boolean {
         return this.dir?.value === 'rtl';
     }
 
-    _mousemoveX = (e: IPositionEvent): void => {
+    public get scrollSize(): number {
+        return this.cdk.getDataLength() * this.itemSize;
+    }
+
+    public mousemoveX = (e: IPositionEvent): void => {
         if (e) {
             const offset = this.cdk.measureScrollOffset();
             const c = this.rtl ? -1 : 1;
-            const delta = (this._clientX - e.clientX) * c;
+            const delta = (this.clientX - e.clientX) * c;
             const value = offset + delta;
-            this.cdk.scrollToOffset(Math.abs(value));
-            this._clientX = e.clientX;
+            if (value >= 0 && value <= this.scrollSize) {
+                this.cdk.scrollToOffset(Math.abs(value));
+                this.clientX = e.clientX;
+            }
         }
     }
 
-    _mousemoveY = (e: IPositionEvent): void => {
+    public mousemoveY = (e: IPositionEvent): void => {
         if (e) {
             const offset = this.cdk.measureScrollOffset();
-            const value = offset - e.clientY + this._clientY;
-            this.cdk.scrollToOffset(value);
-            this._clientY = e.clientY;
+            const value = offset - e.clientY + this.clientY;
+            if (value >= 0 && value <= this.scrollSize) {
+                this.cdk.scrollToOffset(value);
+                this.clientY = e.clientY;
+            }
         }
     }
 
-    start = (e: IPositionEvent): void => {
+    public start = (e: IPositionEvent): void => {
         this.toggleSwiped(true);
-        this._clientX = e.clientX;
-        this._clientY = e.clientY;
-        this._prevClientX = e.clientX;
-        this._prevClientY = e.clientY;
+        this.clientX = e.clientX;
+        this.clientY = e.clientY;
+        this.prevClientX = e.clientX;
+        this.prevClientY = e.clientY;
     }
 
-    move = (e: IPositionEvent): void => {
-        if (this._swiped) {
-            if (this.cdk.orientation === 'horizontal') {
-                this._mousemoveX(e);
+    public move = (e: IPositionEvent): void => {
+        if (this.swiped) {
+            if (this.cdk.orientation === HORIZONTAL_ORIENTATION) {
+                this.mousemoveX(e);
             }
-            else if (this.cdk.orientation === 'vertical') {
-                this._mousemoveY(e);
+            else if (this.cdk.orientation === VERTICAL_ORIENTATION) {
+                this.mousemoveY(e);
             }
         }
     }
 
-    toggleSwiped = (value: boolean): void => {
-        this._swiped = value;
+    public toggleSwiped = (value: boolean): void => {
+        this.swiped = value;
     }
 
-    finalize = (): void => {
+    public finalize = (): void => {
         if (this.options.finalize) {
             this.scrollToNearestIndex();
         }
     }
 
-    scrollToNearestIndex = (): void => {
-        const delta = this.cdk.orientation === 'horizontal' ? this._prevClientX - this._clientX :
-            this.cdk.orientation === 'vertical' ? this._prevClientY - this._clientY :
+    public scrollToNearestIndex = (): void => {
+        const delta = this.cdk.orientation === HORIZONTAL_ORIENTATION ? this.prevClientX - this.clientX :
+            this.cdk.orientation === VERTICAL_ORIENTATION ? this.prevClientY - this.clientY :
                 null;
         if (isNumber(delta)) {
             const directionDelta = this.rtl ? delta * -1 : delta;
-            const index = directionDelta > 0 && Math.abs(directionDelta) >= this.options.threshold ? this._index + 1 : this._index;
+            const index = directionDelta > 0 && Math.abs(directionDelta) >= this.options.threshold ? this.index + 1 : this.index;
             this.cdk.scrollToIndex(index, 'smooth');
         }
     }
 
-    addEventListener = (): void => {
+    public addEventListener = (): void => {
         this.cdk.elementRef.nativeElement.addEventListener('click', this.preventClicks, true);
     }
 
-    removeEventListener = (): void => {
+    public removeEventListener = (): void => {
         this.cdk.elementRef.nativeElement.removeEventListener('click', this.preventClicks, true);
     }
 
     /** prevent all type of clicks (e.g. click on links, Angular`s click) */
-    preventClicks = (e): void => {
+    public preventClicks = (e): void => {
         if (this.changed && this.options.preventClicks) {
             e.stopPropagation();
             e.preventDefault();
