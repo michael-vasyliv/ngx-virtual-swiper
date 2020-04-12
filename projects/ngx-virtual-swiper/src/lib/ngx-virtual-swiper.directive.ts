@@ -42,7 +42,7 @@ export class NgxVirtualSwiperDirective implements OnInit, OnDestroy {
 
     @HostListener('mousedown', ['$event']) public onMousedown = (e): void => this.start(getClickPositions(e));
 
-    @HostListener('touchstart', ['$event']) public onMouchstart = (e): void => this.start(getTouchPositions(e));
+    @HostListener('touchstart', ['$event']) public onTouchstart = (e): void => this.start(getTouchPositions(e));
 
     @HostListener('mousemove', ['$event']) public onMousemove = (e): void => this.move(getClickPositions(e));
 

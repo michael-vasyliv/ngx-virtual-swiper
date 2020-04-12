@@ -62,7 +62,7 @@ describe('NgxVirtualSwiperDirective', () => {
         });
         it('onMouchstart', () => {
             spyOn(directive, 'start');
-            directive.onMouchstart({ touches: [event] });
+            directive.onTouchstart({ touches: [event] });
             expect(directive.start).toHaveBeenCalledWith(event);
         });
         it('onMousemove', () => {
