@@ -9,5 +9,5 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/
 })
 export class NgxHorizontalComponent {
 
-    items = Array.from({ length: 100000 }).map((_, i) => `Item #${i}`);
+    public items = Array.from({ length: 100000 }).map((_, i) => `Item #${i}`);
 }

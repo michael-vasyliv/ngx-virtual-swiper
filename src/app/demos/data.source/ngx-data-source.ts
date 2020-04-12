@@ -16,7 +16,7 @@ export class MyDataSource extends DataSource<string | undefined> {
         console.clear();
     }
 
-    connect(item: CollectionViewer): Observable<(string | undefined)[]> {
+    public connect(item: CollectionViewer): Observable<(string | undefined)[]> {
         this.subscription.add(item.viewChange.subscribe(range => {
             const startPage = this.getPageForIndex(range.start);
             const endPage = this.getPageForIndex(range.end - 1);
@@ -27,7 +27,7 @@ export class MyDataSource extends DataSource<string | undefined> {
         return this.dataStream;
     }
 
-    disconnect(): void {
+    public disconnect(): void {
         this.subscription.unsubscribe();
     }
 
@@ -57,9 +57,9 @@ export class MyDataSource extends DataSource<string | undefined> {
 })
 export class NgxDataSourceComponent {
 
-    items = new MyDataSource();
+    public items = new MyDataSource();
 
-    click = () => {
+    public click = () => {
         console.log('hellow bob');
     }
 }
