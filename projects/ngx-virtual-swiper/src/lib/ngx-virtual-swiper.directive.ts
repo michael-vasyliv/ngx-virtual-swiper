@@ -37,13 +37,13 @@ export class NgxVirtualSwiperDirective implements OnInit, OnDestroy {
         this.subscription.unsubscribe();
     }
 
-    @HostListener('mousedown', ['$event']) mousedown = (e) => this.start(getClickPositions(e));
+    @HostListener('mousedown', ['$event']) mousedown = (e): void => this.start(getClickPositions(e));
 
-    @HostListener('touchstart', ['$event']) touchstart = (e) => this.start(getTouchPositions(e));
+    @HostListener('touchstart', ['$event']) touchstart = (e): void => this.start(getTouchPositions(e));
 
-    @HostListener('mousemove', ['$event']) mousemove = (e) => this.move(getClickPositions(e));
+    @HostListener('mousemove', ['$event']) mousemove = (e): void => this.move(getClickPositions(e));
 
-    @HostListener('touchmove', ['$event']) touchmove = (e) => this.move(getTouchPositions(e));
+    @HostListener('touchmove', ['$event']) touchmove = (e): void => this.move(getTouchPositions(e));
 
     @HostListener('document:mouseup')
     @HostListener('touchend') finish = (): void => {
@@ -69,8 +69,12 @@ export class NgxVirtualSwiperDirective implements OnInit, OnDestroy {
         return result;
     }
 
-    get rtl() {
+    get rtl(): boolean {
         return this.dir?.value === 'rtl';
+    }
+
+    get scrollSize(): number {
+        return this.cdk.getDataLength() * this.itemSize;
     }
 
     _mousemoveX = (e: IPositionEvent): void => {
@@ -79,8 +83,10 @@ export class NgxVirtualSwiperDirective implements OnInit, OnDestroy {
             const c = this.rtl ? -1 : 1;
             const delta = (this._clientX - e.clientX) * c;
             const value = offset + delta;
-            this.cdk.scrollToOffset(Math.abs(value));
-            this._clientX = e.clientX;
+            if (value >= 0 && value <= this.scrollSize) {
+                this.cdk.scrollToOffset(Math.abs(value));
+                this._clientX = e.clientX;
+            }
         }
     }
 
@@ -88,8 +94,10 @@ export class NgxVirtualSwiperDirective implements OnInit, OnDestroy {
         if (e) {
             const offset = this.cdk.measureScrollOffset();
             const value = offset - e.clientY + this._clientY;
-            this.cdk.scrollToOffset(value);
-            this._clientY = e.clientY;
+            if (value >= 0 && value <= this.scrollSize) {
+                this.cdk.scrollToOffset(value);
+                this._clientY = e.clientY;
+            }
         }
     }
 
