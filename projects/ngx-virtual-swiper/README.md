@@ -14,7 +14,7 @@ Swiper with virtual scroll.
   </a>
 </p>
 
-## [Demo](https://stackblitz.com/edit/angular-kw59pk)
+## [Demo](https://stackblitz.com/edit/angular-5qz2y7)
 
 ## [Examples](https://github.com/michael-vasyliv/ngx-virtual-swiper/tree/master/src/app/demos)
 
