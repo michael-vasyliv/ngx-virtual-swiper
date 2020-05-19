@@ -1,0 +1,39 @@
+name: Test and Build PR
+
+on:
+  pull_request:
+    branches: [ master ]
+
+env:
+  NODE_VERSION: '12.x'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Cache Node.js modules
+      uses: actions/cache@v2
+      with:
+        path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
+        key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.OS }}-node-
+          ${{ runner.OS }}-
+        
+    - name: Install dependencies
+      run: npm install
+
+    - name: Test app
+      run: npm run test ngx-virtual-swiper-demo
+
+    - name: Test lib
+      run: npm run test:lib
+
+    - name: Build app
+      run: npm run ng build -- --prod
+
+    - name: Build lib
+      run: npm run build:lib
