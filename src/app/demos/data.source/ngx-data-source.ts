@@ -11,7 +11,7 @@ export class MyDataSource extends DataSource<string | undefined> {
     private dataStream = new BehaviorSubject<(string | undefined)[]>(this.cachedData);
     private subscription = new Subscription();
 
-    constructor() {
+    public constructor() {
         super();
         console.clear();
     }
@@ -50,6 +50,7 @@ export class MyDataSource extends DataSource<string | undefined> {
 }
 
 @Component({
+    // eslint-disable-next-line @angular-eslint/component-selector
     selector: 'ngx-source',
     styleUrls: ['ngx-data-source.css'],
     templateUrl: 'ngx-data-source.html',
@@ -61,5 +62,5 @@ export class NgxDataSourceComponent {
 
     public click = () => {
         console.log('hellow bob');
-    }
+    };
 }

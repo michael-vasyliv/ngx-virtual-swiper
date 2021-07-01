@@ -15,5 +15,5 @@ export class NgxVirtualSwiperOptions {
     /** prevent all type of clicks (e.g. links, Angular`s click) */
     public preventClicks = true;
 
-    constructor() { }
+    public constructor() { }
 }

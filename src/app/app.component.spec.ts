@@ -26,7 +26,7 @@ describe('AppComponent', () => {
         expect(app).toBeTruthy();
     });
 
-    it(`should have as title 'ngx-virtual-swiper-demo'`, () => {
+    it('should have as title \'ngx-virtual-swiper-demo\'', () => {
         const fixture = TestBed.createComponent(AppComponent);
         const app = fixture.debugElement.componentInstance;
         expect(app.title).toEqual('ngx-virtual-swiper-demo');

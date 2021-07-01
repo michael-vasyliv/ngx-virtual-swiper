@@ -24,7 +24,7 @@ export class NgxVirtualSwiperDirective implements OnInit, OnDestroy {
     public prevClientX: number;
     public prevClientY: number;
 
-    constructor(
+    public constructor(
         @Inject(NgxVirtualSwiperOptions) private options: NgxVirtualSwiperOptions,
         /** to lean more see https://material.angular.io/cdk/scrolling/api */
         @Inject(CdkVirtualScrollViewport) private cdk: CdkVirtualScrollViewport,
@@ -41,24 +41,31 @@ export class NgxVirtualSwiperDirective implements OnInit, OnDestroy {
         this.subscription.unsubscribe();
     }
 
-    @HostListener('mousedown', ['$event']) public onMousedown = (e): void => this.start(getClickPositions(e));
+    // eslint-disable-next-line @typescript-eslint/member-ordering
+    @HostListener('mousedown', ['$event'])
+    public onMousedown = (e: IPositionEvent): void => this.start(getClickPositions(e));
 
-    @HostListener('touchstart', ['$event']) public onTouchstart = (e): void => this.start(getTouchPositions(e));
+    @HostListener('touchstart', ['$event'])
+    public onTouchstart = (e: { touches: IPositionEvent[] }): void => this.start(getTouchPositions(e));
 
-    @HostListener('mousemove', ['$event']) public onMousemove = (e): void => this.move(getClickPositions(e));
+    @HostListener('mousemove', ['$event'])
+    public onMousemove = (e: IPositionEvent): void => this.move(getClickPositions(e));
 
-    @HostListener('touchmove', ['$event']) public onTouchmove = (e): void => this.move(getTouchPositions(e));
+    @HostListener('touchmove', ['$event'])
+    public onTouchmove = (e: { touches: IPositionEvent[] }): void => this.move(getTouchPositions(e));
 
     @HostListener('document:mouseup')
-    @HostListener('touchend') public onFinish = (): void => {
+    @HostListener('touchend')
+    public onFinish = (): void => {
         if (this.swiped) {
             this.toggleSwiped(false);
             this.finalize();
         }
-    }
+    };
 
     /** the bug-fix to prevent dragging images while swiping */
-    @HostListener('document:dragstart', ['$event']) public onDragstart = (e): void => e.preventDefault();
+    @HostListener('document:dragstart', ['$event'])
+    public onDragstart = (e: { preventDefault: any }): void => e.preventDefault();
 
     public get changed(): boolean {
         let result = false;
@@ -92,7 +99,7 @@ export class NgxVirtualSwiperDirective implements OnInit, OnDestroy {
                 this.clientX = e.clientX;
             }
         }
-    }
+    };
 
     public mousemoveY = (e: IPositionEvent): void => {
         if (e) {
@@ -103,7 +110,7 @@ export class NgxVirtualSwiperDirective implements OnInit, OnDestroy {
                 this.clientY = e.clientY;
             }
         }
-    }
+    };
 
     public start = (e: IPositionEvent): void => {
         this.toggleSwiped(true);
@@ -111,28 +118,27 @@ export class NgxVirtualSwiperDirective implements OnInit, OnDestroy {
         this.clientY = e.clientY;
         this.prevClientX = e.clientX;
         this.prevClientY = e.clientY;
-    }
+    };
 
     public move = (e: IPositionEvent): void => {
         if (this.swiped) {
             if (this.cdk.orientation === HORIZONTAL_ORIENTATION) {
                 this.mousemoveX(e);
-            }
-            else if (this.cdk.orientation === VERTICAL_ORIENTATION) {
+            } else if (this.cdk.orientation === VERTICAL_ORIENTATION) {
                 this.mousemoveY(e);
             }
         }
-    }
+    };
 
     public toggleSwiped = (value: boolean): void => {
         this.swiped = value;
-    }
+    };
 
     public finalize = (): void => {
         if (this.options.finalize) {
             this.scrollToNearestIndex();
         }
-    }
+    };
 
     public scrollToNearestIndex = (): void => {
         const delta = this.cdk.orientation === HORIZONTAL_ORIENTATION ? this.prevClientX - this.clientX :
@@ -143,22 +149,22 @@ export class NgxVirtualSwiperDirective implements OnInit, OnDestroy {
             const index = directionDelta > 0 && Math.abs(directionDelta) >= this.options.threshold ? this.index + 1 : this.index;
             this.cdk.scrollToIndex(index, 'smooth');
         }
-    }
+    };
 
     public addEventListener = (): void => {
         this.cdk.elementRef.nativeElement.addEventListener('click', this.preventClicks, true);
-    }
+    };
 
     public removeEventListener = (): void => {
         this.cdk.elementRef.nativeElement.removeEventListener('click', this.preventClicks, true);
-    }
+    };
 
     /** prevent all type of clicks (e.g. click on links, Angular`s click) */
-    public preventClicks = (e): void => {
+    public preventClicks = (e: MouseEvent): void => {
         if (this.changed && this.options.preventClicks) {
             e.stopPropagation();
             e.preventDefault();
             e.stopImmediatePropagation();
         }
-    }
+    };
 }
