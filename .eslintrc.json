@@ -42,7 +42,8 @@
         "no-underscore-dangle": "off",
         "no-unused-expressions": "error",
         "quotes": ["error", "single"],
-        "semi": "error"
+        "semi": "error",
+        "@typescript-eslint/member-ordering": "off"
       }
     },
     {
