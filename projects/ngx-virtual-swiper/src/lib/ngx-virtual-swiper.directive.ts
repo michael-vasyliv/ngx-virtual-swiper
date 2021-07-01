@@ -160,7 +160,7 @@ export class NgxVirtualSwiperDirective implements OnInit, OnDestroy {
     };
 
     /** prevent all type of clicks (e.g. click on links, Angular`s click) */
-    public preventClicks = (e: jasmine.SpyObj<MouseEvent>): void => {
+    public preventClicks = (e: MouseEvent): void => {
         if (this.changed && this.options.preventClicks) {
             e.stopPropagation();
             e.preventDefault();
