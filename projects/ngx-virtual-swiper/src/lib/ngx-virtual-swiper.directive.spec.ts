@@ -25,7 +25,7 @@ describe('NgxVirtualSwiperDirective', () => {
         ]);
         cdk.getDataLength.and.returnValue(10);
 
-        directive = new NgxVirtualSwiperDirective(null, options, cdk);
+        directive = new NgxVirtualSwiperDirective(options, cdk, null);
         directive.itemSize = 100;
     });
 
@@ -109,7 +109,7 @@ describe('NgxVirtualSwiperDirective', () => {
                 expect(directive.rtl).toEqual(false);
             });
             it('true', () => {
-                directive = new NgxVirtualSwiperDirective({ value: 'rtl' } as Directionality, options, cdk);
+                directive = new NgxVirtualSwiperDirective(options, cdk, { value: 'rtl' } as Directionality);
                 expect(directive.rtl).toEqual(true);
             });
         });

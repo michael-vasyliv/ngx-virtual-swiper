@@ -8,6 +8,7 @@ import { getClickPositions, getTouchPositions, isNumber } from './utils';
 
 const VERTICAL_ORIENTATION = 'vertical';
 const HORIZONTAL_ORIENTATION = 'horizontal';
+const RIGHT_TO_LEFT = 'rtl';
 
 @Directive({
     selector: '[ngxVirtualSwiper]'
@@ -24,10 +25,10 @@ export class NgxVirtualSwiperDirective implements OnInit, OnDestroy {
     public prevClientY: number;
 
     constructor(
-        @Optional() @Inject(Directionality) private dir: Directionality,
         @Inject(NgxVirtualSwiperOptions) private options: NgxVirtualSwiperOptions,
         /** to lean more see https://material.angular.io/cdk/scrolling/api */
-        @Inject(CdkVirtualScrollViewport) private cdk: CdkVirtualScrollViewport
+        @Inject(CdkVirtualScrollViewport) private cdk: CdkVirtualScrollViewport,
+        @Optional() @Inject(Directionality) private dir?: Directionality
     ) { }
 
     public ngOnInit(): void {
@@ -73,7 +74,7 @@ export class NgxVirtualSwiperDirective implements OnInit, OnDestroy {
     }
 
     public get rtl(): boolean {
-        return this.dir?.value === 'rtl';
+        return this.dir?.value === RIGHT_TO_LEFT;
     }
 
     public get scrollSize(): number {
